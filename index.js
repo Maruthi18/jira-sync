@@ -29,6 +29,7 @@ const issueMap = {}; // Use DB in real use cases
 
 // --- Webhook Endpoint for Jira A (A → B) ---
 app.post('/webhook/jira-a', async (req, res) => {
+  console.log("Received webhook from Jira A:", JSON.stringify(req.body));
   const payload = req.body;
   const issueKey = payload?.issue?.key;
   const summary = payload?.issue?.fields?.summary;
@@ -40,7 +41,7 @@ app.post('/webhook/jira-a', async (req, res) => {
   const createIssueUrl = `${JIRA_B_BASE_URL}/rest/api/3/issue`;
   const data = {
     fields: {
-      project: { key: 'SPB' }, // Jira B project key
+      project: { key: 'SPB' },
       summary: `[Synced from Jira A] ${summary}`,
       description,
       issuetype: { name: 'Task' }
@@ -52,12 +53,14 @@ app.post('/webhook/jira-a', async (req, res) => {
     issueMap[issueKey] = response.data.key;
     res.status(201).json({ status: 'Issue created in Jira B', jira_b_key: response.data.key });
   } catch (error) {
+    console.error("Error syncing to Jira B:", error.response?.data || error.message);
     res.status(500).json({ status: 'Failed to create issue in Jira B', details: error.response?.data || error.message });
   }
 });
 
 // --- Webhook Endpoint for Jira B (B → A) ---
 app.post('/webhook/jira-b', async (req, res) => {
+  console.log("Received webhook from Jira B:", JSON.stringify(req.body));
   const payload = req.body;
   const issueKey = payload?.issue?.key;
   const summary = payload?.issue?.fields?.summary;
@@ -69,7 +72,7 @@ app.post('/webhook/jira-b', async (req, res) => {
   const createIssueUrl = `${JIRA_A_BASE_URL}/rest/api/3/issue`;
   const data = {
     fields: {
-      project: { key: 'SPA' }, // Jira A project key
+      project: { key: 'SPA' },
       summary: `[Synced from Jira B] ${summary}`,
       description,
       issuetype: { name: 'Task' }
@@ -81,6 +84,7 @@ app.post('/webhook/jira-b', async (req, res) => {
     issueMap[issueKey] = response.data.key;
     res.status(201).json({ status: 'Issue created in Jira A', jira_a_key: response.data.key });
   } catch (error) {
+    console.error("Error syncing to Jira A:", error.response?.data || error.message);
     res.status(500).json({ status: 'Failed to create issue in Jira A', details: error.response?.data || error.message });
   }
 });
@@ -91,6 +95,7 @@ app.get('/', (req, res) => {
 });
 
 // --- Start Server ---
+console.log("Attempting to start server...");
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
