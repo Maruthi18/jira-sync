@@ -71,13 +71,15 @@ app.post('/webhook/jira-b', async (req, res) => {
 
   const createIssueUrl = `${JIRA_A_BASE_URL}/rest/api/3/issue`;
   const data = {
-    fields: {
-      project: { key: 'SPA' },
-      summary: `[Synced from Jira B] ${summary}`,
-      description,
-      issuetype: { name: 'Task' }
-    }
-  };
+  fields: {
+    project: { key: 'SPA' },
+    summary: `[Synced from Jira B] ${summary}`,
+    description,
+    issuetype: { name: 'Task' },
+    customfield_10161: 1 
+  }
+};
+
 
   try {
     const response = await axios.post(createIssueUrl, data, { headers: HEADERS_A });
