@@ -22,7 +22,8 @@ const HEADERS_B = {
 
 const issueMap = {}; // Use DB in real use cases
 
-app.post('/webhooks/webhook1', async (req, res) => {
+// --- Webhook Endpoint for Jira A ---
+app.post('/webhook/jira-a', async (req, res) => {
   const payload = req.body;
   const issueKey = payload?.issue?.key;
   const summary = payload?.issue?.fields?.summary;
@@ -55,10 +56,12 @@ app.post('/webhooks/webhook1', async (req, res) => {
   }
 });
 
+// --- Health Check ---
 app.get('/', (req, res) => {
   res.json({ status: 'Jira Sync Middleware Running' });
 });
 
+// --- Start Server ---
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
